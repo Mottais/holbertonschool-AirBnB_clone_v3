@@ -8,30 +8,40 @@ from api.v1.views import app_views
 
 @app_views.route("/states", methods=["GET"], strict_slashes=False)
 def get_states():
-    """Retrieve the list of all objects"""
-    states_get = storage.all(State).values()
-    if states_get is None:
+    """Retourne la liste de tous les objets State format to_dict()"""
+    All_Objs_States = storage.all(State).values()
+    if All_Objs_States is None:
         abort(404)
-    state_dict = []
-    for state_get in states_get:
-        all_states = state_get.to_dict()
-        state_dict.append(all_states)
-    return jsonify(state_dict)
+
+    StatesDict = []
+    for Obj_state in All_Objs_States:
+        StatesDict.append(Obj_state.to_dict())
+    return jsonify(StatesDict)
 
 
 @app_views.route("/states/<state_id>", methods=["GET"], strict_slashes=False)
 def get_state(state_id):
-    """Retrieve a State object by ID"""
-    state_get = storage.get(State, state_id)
-    if state_get is None:
+    """Retourne l'objet State de l'id spécifié au format to_dict()"""
+    """commande shell :"""
+    """curl -X GET http://0.0.0.0:5000/api/v1/states/8f165686-c98...e2d99 ou"""
+    """curl -X GET http://127.0.0.1:5000/api/v1/states/8f165686-c98...e2d99"""
+    """ou dans un navigateur :"""
+    """http://127.0.0.1:5000/api/v1/states/8f165686-c98...e2d99"""
+
+    Obj_state = storage.get(State, state_id)
+    if Obj_state is None:
         abort(404)
-    return jsonify(state_get.to_dict())
+    return jsonify(Obj_state.to_dict())
 
 
-@app_views.route(
-        "/states/<state_id>", methods=["DELETE"], strict_slashes=False)
+@app_views.route("/states/<state_id>", methods=["DELETE"],
+                 strict_slashes=False)
 def delete_state(state_id):
-    """Delete a State object by ID"""
+    """Retourne l'objet State de l'id spécifié format to_dict()"""
+    # commande shell :
+    # curl -X GET http://0.0.0.0:5000/api/v1/states/8f165686-c98...e2d99 ou
+    # curl -X GET http://127.0.0.1:5000/api/v1/states/8f165686-c98...e2d99
+    # (NB: la méthode [GET] est appliquée par défaut dans un navigateur)
     state_delete = storage.get(State, state_id)
     if state_delete is None:
         abort(404)
@@ -42,7 +52,11 @@ def delete_state(state_id):
 
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
 def create_state():
-    """Create a new State object"""
+    """Créé un nouvel objet State"""
+    # exemple commande shell : curl -X POST http://0.0.0.0:5000/api/v1/state
+    # s/ -H "Content-Type: application/json" -d '{"name": "California"}'
+
+    # Récupère le contenu de la requête --> {"name": "California"}
     data = request.get_json()
     if data is None:
         return jsonify({"error": "Not a JSON"}), 400
@@ -57,9 +71,12 @@ def create_state():
 
 @app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
 def update_state(state_id):
-    """Update a State object"""
-    state_get = storage.get(State, state_id)
-    if state_get is None:
+    """Modifie l'objet State de l'id spécifié"""
+    # exemple commande shell : curl -X PUT http://0.0.0.0:5000/api/v1/state
+    # s/feadaa73-9e4b-4514-905b-8253f36b46f6 -H "Content-Type: application/js
+    # on" -d '{"name": "California is so cool"}'
+    Obj_state = storage.get(State, state_id)
+    if Obj_state is None:
         abort(404)
 
     data = request.get_json()
@@ -68,7 +85,7 @@ def update_state(state_id):
 
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
-            setattr(state_get, key, value)
+            setattr(Obj_state, key, value)
 
     storage.save()
-    return jsonify(state_get.to_dict()), 200
+    return jsonify(Obj_state.to_dict()), 200
