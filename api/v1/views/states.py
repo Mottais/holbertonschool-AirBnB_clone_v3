@@ -57,16 +57,20 @@ def create_state():
     # s/ -H "Content-Type: application/json" -d '{"name": "California"}'
 
     # Récupère le contenu de la requête --> {"name": "California"}
-    data = request.get_json()
-    if data is None:
-        return jsonify({"error": "Not a JSON"}), 400
+    try:
+        data = request.get_json()
 
-    if 'name' not in data:
-        return jsonify({"error": "Missing name"}), 400
+        if 'name' not in data:
+            return jsonify({"error": "Missing name"}), 400
 
-    new_state = State(**data)
-    new_state.save()
-    return jsonify(new_state.to_dict()), 201
+        new_state = State(**data)
+        new_state.save()
+        return jsonify(new_state.to_dict()), 201
+
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
 
 
 @app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
