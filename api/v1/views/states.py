@@ -83,13 +83,16 @@ def update_state(state_id):
     if Obj_state is None:
         abort(404)
 
-    data = request.get_json()
-    if data is None:
-        return jsonify({"error": "Not a JSON"}), 400
+    try:
+        data = request.get_json()
+        for key, value in data.items():
+            if key not in ['id', 'created_at', 'updated_at']:
+                setattr(Obj_state, key, value)
 
-    for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at']:
-            setattr(Obj_state, key, value)
+        storage.save()
+        return jsonify(Obj_state.to_dict()), 200
 
-    storage.save()
-    return jsonify(Obj_state.to_dict()), 200
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
