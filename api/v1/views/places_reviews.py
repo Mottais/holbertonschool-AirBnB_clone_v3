@@ -58,26 +58,29 @@ def create_review(place_id):
     if not place:
         abort(404)
 
-    req = request.get_json()
 
-    if req is None:
-        abort(400, 'Not a JSON')
-    if 'user_id' not in req:
-        abort(400, 'Missing user_id')
-    if 'text' not in req:
-        abort(400, 'Missing text')
+    try:
+        req = request.get_json()
+        if 'user_id' not in req:
+            abort(400, 'Missing user_id')
+        if 'text' not in req:
+            abort(400, 'Missing text')
 
-    text = req['text']
-    user_id = req['user_id']
-    user = storage.get(User, user_id)
+        text = req['text']
+        user_id = req['user_id']
+        user = storage.get(User, user_id)
 
-    if not user:
-        abort(404)
+        if not user:
+            abort(404)
 
-    new_review = Review(text=text, user_id=user_id)
-    new_review.save()
+        new_review = Review(text=text, user_id=user_id)
+        new_review.save()
 
-    return jsonify(new_review.to_dict()), 201
+        return jsonify(new_review.to_dict()), 201
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
 
 
 @app_views.route('/reviews/<review_id>', methods=['PUT'], strict_slashes=False)
@@ -88,16 +91,18 @@ def update_review(review_id):
     if not review:
         abort(404)
 
-    req = request.get_json()
+    try:
+        req = request.get_json()
 
-    if req is None:
-        abort(400, 'Not a JSON')
+        for key, value in req.items():
+            if key not in ['id', 'user_id', 'place_id', 'created_at',
+                        'updated_at']:
+                setattr(review, key, value)
 
-    for key, value in req.items():
-        if key not in ['id', 'user_id', 'place_id', 'created_at',
-                       'updated_at']:
-            setattr(review, key, value)
+        review.save()
 
-    review.save()
-
-    return jsonify(review.to_dict()), 200
+        return jsonify(review.to_dict()), 200
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
