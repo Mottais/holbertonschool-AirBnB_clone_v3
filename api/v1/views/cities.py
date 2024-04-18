@@ -52,16 +52,20 @@ def create_city(state_id):
         abort(404)
 
     # Récupère le contenu JSON de la requête --> ex : {"name": "Alexandria"}
-    data = request.get_json()
-    if not data:
-        abort(400, "Not a JSON")
-    if 'name' not in data:
-        abort(400, "Missing name")
+    try:
+        data = request.get_json()
+        if 'name' not in data:
+            abort(400, "Missing name")
 
-    data['state_id'] = state_id
-    new_city = City(**data)
-    new_city.save()
-    return jsonify(new_city.to_dict()), 201
+        data['state_id'] = state_id
+        new_city = City(**data)
+        new_city.save()
+        return jsonify(new_city.to_dict()), 201
+
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
 
 
 @app_views.route('/cities/<city_id>', methods=['PUT'], strict_slashes=False)
@@ -71,13 +75,17 @@ def update_city(city_id):
     if city_get is None:
         abort(400, "Not a JSON")
 
-    data = request.get_json()
-    if data is None:
-        abort(400, "Not a JSON")
+    try:
+        data = request.get_json()
 
-    for key, value in data.items():
-        if key not in ['id', 'state_id', 'created_at', 'updated_at']:
-            setattr(city_get, key, value)
+        for key, value in data.items():
+            if key not in ['id', 'state_id', 'created_at', 'updated_at']:
+                setattr(city_get, key, value)
 
-    storage.save()
-    return jsonify(city_get.to_dict()), 200
+        storage.save()
+        return jsonify(city_get.to_dict()), 200
+
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
