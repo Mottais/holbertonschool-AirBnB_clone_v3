@@ -60,22 +60,23 @@ def create_place(city_id):
     try:
         req = request.get_json()
 
-        if 'name' not in req:
-            abort(400, 'Missing name')
         if 'user_id' not in req:
-            abort(400, 'Missing user_id')
-
-        name = req['name']
+            response = jsonify({"message": "Missing user_id"})
+            response.status_code = 400
+            return response
         user_id = req['user_id']
-
         user = storage.get(User, user_id)
-
         if not user:
-            abort(404)
+            return jsonify(error="Not found"), 404
+
+        if 'name' not in req:
+            response = jsonify({"message": "Missing name"})
+            response.status_code = 400
+            return response
+        name = req['name']
 
         new_place = Place(name=name, user_id=user_id, city_id=city_id)
         new_place.save()
-
         return jsonify(new_place.to_dict()), 201
 
     except Exception:
