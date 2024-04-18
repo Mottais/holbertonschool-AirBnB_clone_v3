@@ -14,7 +14,7 @@ def get_cities_by_states(state_id):
     # Retourne l'objet State de l'id spécifié
     states_get = storage.get(State, state_id)
     if states_get is None:
-        abort(403)
+        abort(404)
     cities_dict = []
     for city_get in states_get.cities:
         cities_dict.append(city_get.to_dict())
