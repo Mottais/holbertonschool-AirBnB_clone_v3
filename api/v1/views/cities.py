@@ -73,7 +73,7 @@ def update_city(city_id):
     """Modifie l'objet City de l'id spécifié"""
     city_get = storage.get(City, city_id)
     if city_get is None:
-        abort(400, "Not a JSON")
+        abort(404)
 
     try:
         data = request.get_json()
