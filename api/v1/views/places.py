@@ -57,27 +57,31 @@ def create_place(city_id):
     if not city:
         abort(404)
 
-    req = request.get_json()
+    try:
+        req = request.get_json()
 
-    if req is None:
-        abort(400, 'Not a JSON')
-    if 'name' not in req:
-        abort(400, 'Missing name')
-    if 'user_id' not in req:
-        abort(400, 'Missing user_id')
+        if 'name' not in req:
+            abort(400, 'Missing name')
+        if 'user_id' not in req:
+            abort(400, 'Missing user_id')
 
-    name = req['name']
-    user_id = req['user_id']
+        name = req['name']
+        user_id = req['user_id']
 
-    user = storage.get(User, user_id)
+        user = storage.get(User, user_id)
 
-    if not user:
-        abort(404)
+        if not user:
+            abort(404)
 
-    new_place = Place(name=name, user_id=user_id, city_id=city_id)
-    new_place.save()
+        new_place = Place(name=name, user_id=user_id, city_id=city_id)
+        new_place.save()
 
-    return jsonify(new_place.to_dict()), 201
+        return jsonify(new_place.to_dict()), 201
+
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
 
 
 @app_views.route('/places/<place_id>', methods=['PUT'], strict_slashes=False)
@@ -87,14 +91,18 @@ def update_place(place_id):
     if not place:
         abort(404)
 
-    req = request.get_json()
-    if req is None:
-        abort(400, 'Not a JSON')
+    try:
+        req = request.get_json()
 
-    for key, value in req.items():
-        if key not in ['id', 'user_id', 'created_at', 'updated_at']:
-            setattr(place, key, value)
+        for key, value in req.items():
+            if key not in ['id', 'user_id', 'created_at', 'updated_at']:
+                setattr(place, key, value)
 
-    place.save()
+        place.save()
 
-    return jsonify(place.to_dict()), 200
+        return jsonify(place.to_dict()), 200
+
+    except Exception:
+        response = jsonify({"message": "Not a JSON"})
+        response.status_code = 400
+        return response
