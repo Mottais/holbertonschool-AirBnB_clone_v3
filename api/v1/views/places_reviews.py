@@ -61,18 +61,18 @@ def create_review(place_id):
     try:
         req = request.get_json()
         if 'user_id' not in req:
-            abort(400, 'Missing user_id')
-        if 'text' not in req:
-            abort(400, 'Missing text')
-
-        text = req['text']
+            return jsonify(error="Missing user_id"), 404
         user_id = req['user_id']
         user = storage.get(User, user_id)
-
         if not user:
-            abort(404)
+            return jsonify(error="Not found"), 404
 
-        new_review = Review(text=text, user_id=user_id)
+        if 'text' not in req:
+            return jsonify(error="Missing text"), 404
+
+        text = req['text']
+
+        new_review = Review(text=text, user_id=user_id, place_id=place_id)
         new_review.save()
 
         return jsonify(new_review.to_dict()), 201
