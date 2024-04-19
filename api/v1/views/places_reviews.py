@@ -58,7 +58,6 @@ def create_review(place_id):
     if not place:
         abort(404)
 
-
     try:
         req = request.get_json()
         if 'user_id' not in req:
@@ -96,7 +95,7 @@ def update_review(review_id):
 
         for key, value in req.items():
             if key not in ['id', 'user_id', 'place_id', 'created_at',
-                        'updated_at']:
+                           'updated_at']:
                 setattr(review, key, value)
 
         review.save()
